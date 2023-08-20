@@ -68,9 +68,8 @@ The gradient of the Lagrangian with respect to \( x \) and \( \lambda \) can be 
 
 $$
 \begin{align*}
-\nabla_x L (x + \Delta x, \lambda + \Delta \lambda) & \approx \nabla_x L (x, \lambda) + \frac{\partial^2 L}{\partial x^2} \Delta x + \frac{\partial^2 L}{\partial x \partial \lambda} \Delta \lambda \\
-& = \nabla_xJ(x) + \frac{\partial c}{\partial x} \lambda_{\text{new}} + \frac{\partial^2 L}{\partial x^2} \Delta x \\
-\nabla_{\lambda} L (x + \Delta x, \lambda) & \approx c(x) + \frac{\partial c}{\partial x} \Delta x
+L &= J + \lambda^T c \\
+\nabla_x L (x + \Delta x, \lambda + \Delta \lambda) &\approx \nabla_x L (x, \lambda) + \frac{\partial^2 L}{\partial x^2} \Delta x + \frac{\partial^2 L}{\partial x \partial \lambda} \Delta \lambda \\ &=\nabla_xJ(x)+\nabla_x\lambda^T c(x)+ \frac{\partial^2 L}{\partial x^2} \Delta x + \frac{\partial c}{\partial x} \Delta \lambda\\ &=\nabla_xJ(x)+\frac{\partial c}{\partial x}\lambda+ \frac{\partial^2 L}{\partial x^2} \Delta x + \frac{\partial c}{\partial x} \Delta \lambda\\ &= \nabla_xJ(x)+\frac{\partial c}{\partial x}\lambda_{new}+ \frac{\partial^2 L}{\partial x^2} \Delta x \\ \nabla_{\lambda} L (x + \Delta x, \lambda) &\approx c(x) + \frac{\partial c}{\partial x} \Delta x
 \end{align*}
 $$
 
