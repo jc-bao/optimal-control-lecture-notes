@@ -24,48 +24,120 @@
        - 🟢 Advantages: Makes few assumptions and is sample efficient.
        - 🔴 Disadvantages: Assumes a decent model and doesn't generalize well.
 
-## 🔄 **Iterative Learning Control (ILC)**
-- **Key Notes**:
-  - ILC is a special case of the policy gradient on a policy class:
+## Iterative Learning Control 📘
+
+Iterative Learning Control (ILC) is a fascinating area of optimal control that leverages iterative methods to improve control policies based on previous experiences. This article delves into the mathematical foundations of ILC and its practical implications.
+
+### Overview 🌐
+
+- **Definition**: ILC is essentially a special case of the policy gradient on a policy class. The control policy is represented as:
+  
     $$
     u_k = \bar{u}_k - K_k(x_k - \bar{x}_k)
     $$
-    The latter can be any controller.
-  - ILC is also a special case of the SQP method, where the RHS vector comes from the system rollout.
+    
+    where the latter can be any controller.
 
-- **Formulation of the Tracking Problem**:
-  - The objective is to minimize the following cost function:
-    $$
-    \min_{x_{1:N}, u_{1:N}} J = \sum_{n=1}^{N-1} \left[ \frac{1}{2} (x_n - \bar{x}_n)^T Q (x_n - \bar{x}_n) + \frac{1}{2} (u_n - \bar{u}_n)^T R (u_n - \bar{u}_n) \right] + \frac{1}{2} (x_N - \bar{x}_N)^T Q_N (x_N - \bar{x}_N)
-    $$
-    Subject to:
-    $$
-    x_{n+1} = f_{nominal}(x_n)
-    $$
-    📝 **Note**: In a standard formulation, \(f_{nominal}\) should be \(f_{real}\), but we don't have access to \(f_{real}\). The idea is to replace the model-based rollout trajectory with the real rollout trajectory. However, in the real world, we cannot get the gradient, so we use the original model as an approximation.
+- **Relation to SQP**: ILC can also be seen as a special case of the Sequential Quadratic Programming (SQP) method. This is evident from the way the right-hand side vector originates from the system rollout.
 
-- **Objective Gradient**:
-  - The Lagrangian is defined as:
-    $$
-    L = J + \lambda^T c
-    $$
-    The gradient and Hessian of the KKT conditions are derived as:
-    [Detailed mathematical derivations]
+### Formulation of Tracking Problem 📐
 
-- **Important Observations**:
-  - The constraint \(c(z) = 0\) is always satisfied with real-world data.
-  - Given \(x_n, u_n\), we can still compute the gradient of \(J\).
-  - The entire RHS of the KKT condition (gradient and state) can be obtained.
-  - The controller can be polished using real-world data.
-  - In practice, since \(x_n, u_n\) are already close to the reference trajectory by offline solving, we can compute \(C = \frac{\partial c}{\partial q} |_{\bar{x},\bar{u}}\).
-  - We can then solve the KKT system for \(\Delta z\) and update \(\bar{u}\) using a QP method.
-  - 📝 **Note**: During the rollout, we might use LQR to track the planned open-loop trajectory.
+Consider the following optimization problem for tracking:
 
-<div style="text-align: center;">
-    <img src="figs/iterativeLearningControl.png" style="max-width: 600px; display: inline-block;">
-</div>
+$$
+\begin{align*}
+\min_{x_{1:N}, u_{1:N}} & J = \sum_{n=1}^{N-1} \left[ \frac{1}{2} (x_n - \bar{x}_n)^T Q (x_n - \bar{x}_n) + \frac{1}{2} (u_n - \bar{u}_n)^T R (u_n - \bar{u}_n) \right] \\
+& + \frac{1}{2} (x_N - \bar{x}_N)^T Q_N (x_N - \bar{x}_N) \\
+\text{s.t.} & x_{n+1} = f_{\text{nominal}}(x_n)
+\end{align*}
+$$
 
-- **Why Does ILC Work?**
-  - ILC is an approximation of Newton's method (inexact/quasi-Newton method).
-  - It allows for Newton-style optimization even if we don't have the exact gradient, as long as the approximation satisfies certain conditions.
-  - The method might converge slower than the exact Newton method but is still effective.
+📝 **Notes**:
+- In a standard formulation, \( f_{\text{nominal}} \) should be \( f_{\text{real}} \). However, we often don't have access to \( f_{\text{real}} \). The idea is to approximate the gradient of dynamics.
+- The underlying concept is to replace the model-based rollout trajectory with the real rollout trajectory. A limitation in real-world scenarios is the inability to obtain the gradient, prompting the use of the original model as an approximation.
+
+#### Objective Gradient 📈
+
+The Lagrangian for the problem is:
+
+$$
+L = J + \lambda^T c
+$$
+
+The gradient of the Lagrangian with respect to \( x \) and \( \lambda \) can be approximated as:
+
+$$
+\begin{align*}
+\nabla_x L (x + \Delta x, \lambda + \Delta \lambda) & \approx \nabla_x L (x, \lambda) + \frac{\partial^2 L}{\partial x^2} \Delta x + \frac{\partial^2 L}{\partial x \partial \lambda} \Delta \lambda \\
+& = \nabla_xJ(x) + \frac{\partial c}{\partial x} \lambda_{\text{new}} + \frac{\partial^2 L}{\partial x^2} \Delta x \\
+\nabla_{\lambda} L (x + \Delta x, \lambda) & \approx c(x) + \frac{\partial c}{\partial x} \Delta x
+\end{align*}
+$$
+
+#### Hessian of KKT Condition 📊
+
+The Hessian matrix of the Karush-Kuhn-Tucker (KKT) condition is:
+
+$$
+\begin{align*}
+\begin{bmatrix}
+H & \frac{\partial c(z)}{\partial z}^T \\
+\frac{\partial c(z)}{\partial z} & 0 
+\end{bmatrix}
+\begin{bmatrix}
+\Delta z \\
+\lambda 
+\end{bmatrix}
+= 
+\begin{bmatrix}
+-\nabla_x J \\
+-c(z) 
+\end{bmatrix}
+\end{align*}
+$$
+
+Where:
+
+$$
+H = \begin{bmatrix}
+Q & 0 & \dots & 0 \\
+0 & R & \dots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \dots & Q_N 
+\end{bmatrix}
+$$
+
+And:
+
+$$
+c(z) = \begin{bmatrix}
+\vdots \\
+f(x_n, u_n) - x_{n+1} \\
+\vdots 
+\end{bmatrix}
+$$
+
+📝 **Key Observations**:
+- \( c(z) = 0 \) is always satisfied with real-world data.
+- Given \( x_n, u_n \), we can still obtain the gradient of \( J \).
+- This allows us to obtain the entire right-hand side of the KKT condition.
+- In practice, since \( x_n, u_n \) are already close to the reference trajectory by offline solving, we can compute \( C = \frac{\partial c}{\partial q} |_{\bar{x},\bar{u}} \).
+- We can then solve the KKT system for \( \Delta z \) and update \( \bar{u} \) using a Quadratic Programming (QP) approach.
+
+![ILC Diagram](figs/iterativeLearningControl.png)
+
+📝 **Note**: During the rollout, we might use Linear Quadratic Regulator (LQR) to track the planned open-loop trajectory.
+
+### Why Does ILC Work? 🤔
+
+ILC operates as an approximation of Newton's method. It's a form of inexact or quasi-Newton method. The beauty of ILC is that it allows for Newton-style optimization even if we don't have the exact gradient. This method will converge, albeit potentially slower, as long as the approximation satisfies:
+
+$$
+\| f(x) + \frac{\partial f}{\partial x} \Delta x \| \leq \eta \| f(x) \|
+$$
+
+Where \( \eta < 0 \).
+
+---
+
+With the above insights, it's evident that Iterative Learning Control offers a robust framework for refining control policies iteratively, making it a valuable tool in the realm of optimal control.
