@@ -1,6 +1,6 @@
-# CMU16-745 Optimal Control 2023: Comprehensive Lecture Notes
+# 🚀 CMU16-745 Optimal Control 2023: Comprehensive Lecture Notes
 
-## Course Overview
+## 👀 Course Overview
 
 In this course, Prof. Zac offers an in-depth exploration into the realm of optimization-based control. The lecture notes provided here have been meticulously organized to ensure a structured and comprehensive understanding of the subject matter. Dive into the fascinating world of optimal control through the following topics:
 
@@ -75,15 +75,15 @@ Delve into the practical aspects of control systems with the following topics:
 5. **Autonomous Driving and Game Theory** (Lecture 23)
    - Exploring the intersection of control, autonomy, and game theory.
 
-## Acknowledgments
+## 💁‍♂️ Acknowledgments
 
 A heartfelt thank you to Prof. Zackory Manchester for his invaluable disclosure of lecture videos, notes, and interactive notebooks.
 
-## Disclaimer
+## 🏷️ Disclaimer
 
 While every effort has been made to ensure the accuracy of these notes, the author does not come from a traditional control background. As such, there may be inadvertent errors or misunderstandings. Readers are encouraged to raise any issues they find, and discussions are always welcome. Please remember that all content in this repository is strictly for educational purposes. Unauthorized use or distribution is prohibited.
 
-## Resources
+## 🗳️ Resources
 
 - [Lecture Notebooks](https://github.com/Optimal-Control-16-745/lecture-notebooks)
 - [Official Lecture Notes](https://github.com/Optimal-Control-16-745/16-745-Lecture-Notes/blob/main/16_745_Lecture_Notes.pdf)

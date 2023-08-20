@@ -1,175 +1,133 @@
-## Lecture 16 Contact Dynamics
+# Lecture 16 Contact Dynamics
 
 Contact dynamics is a crucial aspect of robotics and physics simulations, especially when dealing with the sudden change of dynamic variables during contact events. This section delves into the methods to handle such dynamics.
 
-### Dealing with Contact
+## Dealing with Contact 🛑
 
-There are primarily two methods to handle contact dynamics:
+### Modelling methods
 
-1. **Hybrid Formulation**:
-   - **Procedure**:
-     1. Integrate the system dynamics.
-     2. Check the guard function to detect contact.
-     3. If contact is detected, apply a jump mapping.
-     4. Continue integration post-contact.
-   - **Advantages**:
-     - Relatively easy to implement using standard algorithms.
-     - Can be integrated by simply adding additional constraints or optimization variables during contact.
-     - Has been successfully applied in locomotion simulations.
-   - **Disadvantages**:
-     - Requires a pre-specified contact mode sequence, which dictates which part of the robot is in contact at each time step. This can be problematic in scenarios with rich contact dynamics.
+There are primarily two methods to address contact dynamics:
 
-2. **Time-Stepping / Contact-Implicit Formulation**:
-   - **Procedure**: Formulate contact as constraints and solve a constrained optimization problem at each timestep.
-   - **Advantages**:
-     - Doesn't require a pre-specified contact mode sequence.
-   - **Disadvantages**:
-     - The optimization problem becomes significantly more challenging.
+1. **Hybrid Formulation** 🔄:
+    - **Procedure**:
+        1. Integrate the system.
+        2. Check the guard function.
+        3. Apply jump mapping when contact occurs.
+        4. Continue integration.
+    - **Advantages** 🌟:
+        - Easy to implement using standard algorithms.
+        - Just requires adding additional constraints or optimization variables during contact.
+        - Highly successful in locomotion scenarios.
+    - **Disadvantages** 🚫:
+        - Requires a pre-specified contact mode sequence, i.e., which part of the robot is in contact at each time step.
+        - Can be problematic in contact-rich scenarios.
 
-### Example: Falling Brick
+2. **Time-Stepping Method / Contact-Implicit Formulation** ⏰:
+    - **Procedure**: Formulate contact as constraints and solve a constrained optimization problem at each timestep.
+    - **Advantages** 🌟:
+        - No need for a pre-specified contact sequence.
+    - **Disadvantages** 🚫:
+        - The optimization process becomes significantly more challenging.
 
-Consider a brick falling and making contact with the ground.
+### Example: A Brick Falling Down 🧱
+
+Let's understand these methods better with an example:
 
 1. **Time-Stepping Method**:
-
-   - **Equations**:
-
-     - Mapping position to distance to the ground:
-       $$
-       \phi(q) = J [q_x \; q_y]^T
-       $$
-       where \( J = [0 \; 1] \).
-
-     - Dynamics with contact force:
-       $$
-       m\left(\frac{v_{k+1}-v_k}{h}\right) = -mg + J^T\lambda_k
-       $$
-
-     - Backward Euler integration:
-       $$
-       p_{k+1} = p_k + hv_{k+1}
-       $$
-
-     - Contact constraints:
-       $$
-       \begin{align*}
-       \phi(q_{k+1}) & > 0 \implies p[1] > 0 \\
-       \lambda_k & \geq 0 \\
-       \phi(q_{k+1})\lambda_k & = 0
-       \end{align*}
-       $$
-
-     - Converted QP problem (derived from KKT conditions):
-       $$
-       \begin{align*}
-       \min_{V_{k+1}} \ &0.5mV_{k+1}^TV_{k+1} + mV_{k+1}^T(hg - V_k) \\
-       \text{s.t.} \ &J(p_k + hV_{k+1}) = 0
-       \end{align*}
-       $$
-
-   - **Limitations**:
-
-     - Doesn't solve for the exact impact time.
-     - Contact forces are explicitly computed.
-     - Doesn't generalize to higher-order integration methods like RK-4, necessitating smaller time steps.
-     - Complementary conditions (boundary constraints) are non-smooth.
-     - Widely used in simulation engines like PyBullet, DART, and Gazebo.
+    - **Question**: Where is the ground damping ratio?
+    - **Formulation**:
+        $$ 
+        \begin{align*}
+        \phi(q) & = [0 \; 1] [q_x \; q_y]^T \; \text{(mapping position to distance to the ground)} \\
+        m\left(\frac{v_{k+1}-v_k}{h}\right) & =-mg+J^T\lambda_k \\
+        p_{k+1} & = p_k+hv_{k+1} \; \text{(backward Euler)} \\
+        \phi(q_{k+1}) & > 0 \; \to \; p[1] > 0 \\
+        \lambda_k & \geq 0 \; \text{(contact force)} \\
+        \phi(q_{k+1})\lambda_k & = 0 \; \text{(force only when hitting the ground)}
+        \end{align*}
+        $$
+    - **Converted QP Problem**:
+        - **Question**: Why is this a QP problem? (Is it due to KKT conditions?)
+        $$ 
+        \begin{align*}
+        \min_{V_{k+1}} \ &0.5mV_{k+1}^TV_{k+1}+mV_{k+1}^T(hg-V_k) \\
+        s.t.\ \ \ &J(p_k+hV_{k+1})=0 
+        \end{align*}
+        $$
+    - **Limitations**:
+        - Exact impact time isn't determined.
+        - Contact forces are explicitly computed.
+        - Doesn't generalize to higher-order integration (e.g., RK-4), necessitating smaller steps.
+        - Complementary conditions (boundary constraints) aren't smooth.
+        - Widely used in platforms like PyBullet, DART, Gazebo, etc.
 
 2. **Hybrid Method**:
+    - **Formulation**:
+        $$ 
+        \begin{align*}
+        \text{Smooth vector field: } & [\dot{q} \; \dot{v}]^T = [v \; -g ]^T \\
+        \text{Guard function:  } &  \phi(x) \ge 0 \\
+        \text{Jump map: } & x' = g(x) = [q_x \; q_y \; v_x \; 0] ^T 
+        \end{align*}
+        $$
+    - **Algorithm**:
+        ```
+        while t < t_final:
+            if phi(x) ≥ 0:
+                x_dot = f(x)
+            else if phi = 0: 
+                # Sometimes backtracking is needed to find the exact time
+                x’ = g(x)
+        end
+        ```
+    - **Advantages**:
+        - Determines the exact impact time.
+        - Can utilize high-accuracy integrators.
+    - **Disadvantages**:
+        - Doesn't calculate the contact force.
+    - Widely used in tools like TrajOpt/MPC.
+    - **Insight**: If we know the impact time in advance, we can optimize each non-constrained trajectory separately.
 
-   - **Equations**:
+### Notes 📝
 
-     - Smooth vector field:
-       $$
-       [\dot{q} \; \dot{v}]^T = [v \; -g ]^T
-       $$
+Both methods, despite their pros and cons, are widely used in the field of robotics and control systems.
 
-     - Guard function:
-       $$
-       \phi(x) \ge 0
-       $$
+## 🤖 Hybrid Trajectory Optimization for Legged Systems
 
-     - Jump map:
-       $$
-       x' = g(x) = [q_x \; q_y \; v_x \; 0] ^T
-       $$
+<div style="text-align: center;">
+    <img src="figs/jump.png" alt="Hybrid Trajectory Image" style="max-width: 200px; display: inline-block;">
+</div>
 
-   - **Procedure**:
+### 📌 State
 
-     ```
-     while t < t_final:
-         if phi(x) ≥ 0:
-             x_dot = f(x)
-         else if phi = 0:
-             x' = g(x)
-     end
-     ```
-
-   - **Advantages**:
-
-     - Solves for the exact impact time.
-     - Can utilize high-accuracy integrators.
-
-   - **Disadvantages**:
-
-     - Doesn't compute contact forces.
-
-   - **Applications**:
-
-     - Widely used in trajectory optimization tools and model predictive control (MPC).
-
-   - **Insight**: If the impact time is known in advance, each non-constrained trajectory can be optimized separately.
-
-### Final Thoughts
-
-Both the time-stepping and hybrid methods are widely used in the field of robotics and simulations. The choice between them often depends on the specific requirements of the task at hand.
-
-## Hybrid Trajectory Optimization for Legged Systems
-
-![Hybrid Trajectory Optimization Diagram](CMU16-745%20Optimal%20Control%20b4017ef3591745c2b0f29777c17a99ff/Untitled%207.png)
-
-### State Representation
-
-The state of the system is represented by the vector \( x \), which consists of:
-
-- \( r_b \): Body position
-- \( r_f \): Foot position
-- \( v_b \): Body velocity
-- \( v_f \): Foot velocity
-
-Mathematically, the state is given by:
+The state vector, \( x \), represents various parameters of the legged system:
 
 $$
-x = \begin{bmatrix}
-r_b \\
-r_f \\
-v_b \\
-v_f 
+x = \begin{bmatrix} 
+r_b & \text{-- body position} \\
+r_f & \text{-- foot position} \\
+v_b & \text{-- body velocity} \\
+v_f & \text{-- foot velocity} 
 \end{bmatrix} \in \mathbb{R}^8
 $$
 
-### Control Inputs
+### 📌 Control
 
-The control inputs for the system are represented by the vector \( u \), which consists of:
-
-- \( F \): Force applied
-- \( \tau \): Torque applied
-
-Mathematically, the control input is given by:
+The control vector, \( u \), is used to influence the state of the system:
 
 $$
-u = \begin{bmatrix}
-F \\
-\tau 
+u = \begin{bmatrix} 
+F & \text{-- force} \\
+\tau & \text{-- torque} 
 \end{bmatrix} \in \mathbb{R}^2
 $$
 
-### Jump Map
+### 📌 Jump Map
 
-The jump map represents the transition of the state after a specific event, such as a foot contact. It is represented by:
+The jump map, \( x' \), describes the transition of the system:
 
 $$
-x' = g_{21}(x) = \begin{bmatrix}
+x' = g_{21}(x) = \begin{bmatrix} 
 r_b \\
 f_f \\
 v_b \\
@@ -179,31 +137,44 @@ $$
 
 By pre-specifying the contact time step, we can optimize the trajectory accordingly:
 
-![Trajectory Optimization Diagram](CMU16-745%20Optimal%20Control%20b4017ef3591745c2b0f29777c17a99ff/Untitled%208.png)
+<div style="text-align: center;">
+    <img src="figs/hopperTrajOptAlgo.png" alt="Hybrid Trajectory Image" style="max-width: 600px; display: inline-block;">
+</div>
 
-## Reasoning about Frictions
+## 🤖 Reasoning about Frictions
 
-When considering trajectory optimization, it's essential to account for the limitations imposed by friction. The frictional forces can be represented by:
+To ensure the stability and safety of the legged system, it's essential to consider the frictional forces during trajectory optimization.
 
-$$
-\begin{align*}
-&||b||_2 \leq \mu n \\
-&n \in \mathbb{R}_+ : \text{normal force} \\
-&b \in \mathbb{R}^2 : \text{friction force}
-\end{align*}
-$$
+### 📌 Friction Limitation
 
-However, the bottom of the friction cone is non-differentiable. To address this, we often linearize the constraints, leading to the concept of the friction pyramid:
+The frictional force, \( b \), is constrained by the normal force, \( n \), and the coefficient of friction, \( \mu \):
 
 $$
-\begin{align*}
-e^T d &\leq \mu n \ \ \ d \in \mathbb{R}^4 \ \ e = [1, 1, 1, 1]^T \\
-d &\geq 0 \\
-b &= [I \ -I] d
-\end{align*}
+\|b\|_2 \leq \mu n
 $$
 
-### Notes:
+Where:
+- \( n \) is the normal force and \( n \in \mathbb{R}_+ \)
+- \( b \) is the friction force and \( b \in \mathbb{R}^2 \)
 
-- If we want the system to slip, we need to introduce an additional mode.
-- The friction pyramid is a coarse approximation and may not capture all the nuances of real-world frictional interactions.
+### 📌 Linearizing the Friction Constraints
+
+Since the base of the friction cone is non-differentiable, we often linearize the constraints, leading to the concept of a friction pyramid:
+
+$$
+e^T d \leq \mu n \ \ \text{where} \ \ d \in \mathbb{R}^4 \ \ \text{and} \ \ e = [1,1,1,1]^T
+$$
+
+With the additional constraints:
+$$
+d \geq 0
+$$
+
+And:
+$$
+b = [I \ -I]d
+$$
+
+### 📝 Notes
+- If slipping is desired, an additional mode should be introduced.
+- The friction pyramid is a coarse approximation and might not capture all the nuances of real-world frictional interactions.
