@@ -19,8 +19,6 @@ $$
 **Key Insights**:
 - LQR can (locally) approximate many non-linear problems, making it a widely used approach.
 - There are numerous extensions of LQR, such as the infinite horizon case and stochastic LQR.
-- ❓ **Question**: Can we use a time-invariant LQR algorithm to stabilize an inverted pendulum system?
-- ❓ **Question**: Can all control problems be modeled as LQR using Taylor expansion?
 
 ## 🎯 LQR via Shooting Method
 
