@@ -17,7 +17,7 @@ In this section, we will delve into the intricacies of 3D rotation, specifically
   - $^B V$ represents the vector in the body frame.
   - $Q$ is the mapping matrix that transforms the body frame to the world frame. It is an orthogonal matrix.
 
-  ![Attitude Visualization](CMU16-745%20Optimal%20Control%20b4017ef3591745c2b0f29777c17a99ff/Untitled%206.png)
+  ![Attitude Visualization](figs/rot.png)
 
   The transformation can be further expanded as:
 

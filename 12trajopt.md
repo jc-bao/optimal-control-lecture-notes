@@ -33,6 +33,8 @@ SQP is a standard method for trajectory optimization.
 
 ### Strategy 🧠
 
+![SQP](figs/SQP.png)
+
 SQP works by converting the NLP problem into a QP (Quadratic Programming) problem. This is achieved using the 2nd order Taylor expansion of the Lagrangian and linearized \(C(x)\) and \(d(x)\) to approximate NLP as QP.
 
 $$

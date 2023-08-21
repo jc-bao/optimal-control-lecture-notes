@@ -149,6 +149,8 @@ $$
         - More robust to initial guesses.
         - Hyper-linear convergence, but relatively slower.
 
+    ![augLag](figs/augLag.png)
+
 5. **Quadratic Programming**:
     - The optimization problem is:
     $$
