@@ -132,3 +132,62 @@ $$
 - 📏 These are called indirect and/or shooting methods (both are iterative methods).
 - 🕐 In continuous time, \( \lambda(t) \) is called the "co-state" trajectory.
 - 💻 These methods have largely fallen out of favor as computers and solvers have improved.
+
+
+# ⭐ Algorithm Recap
+
+In the realm of optimal control, understanding the nuances of different algorithms and their applications is crucial. Here's a comprehensive breakdown:
+
+## 📏 Linear/Local Control Problems
+
+Linear or local control problems can be categorized based on the presence or absence of constraints:
+
+### 🚫 No Constraints
+
+For problems without constraints, the Linear Quadratic Regulator (LQR) is typically used.
+
+- **Time Variant (e.g., tracking)**: This is referred to as Time Variant LQR (TVLQR).
+    - **Solution Approach**: Differential Dynamic Programming (DDP) or iterative LQR (iLQR) can be employed.
+- **Time Invariant (e.g., stabilization)**: Known as Time Invariant LQR (TILQR).
+    - **Solver Options**: Quadratic Programming (QP) or Dynamic Programming (DP) can be used. Both are equivalent in this context.
+
+### ✅ With Constraints
+
+Model Predictive Control (MPC) is the go-to for problems with constraints.
+
+- **Linear Constraints**: Quadratic Programming (QP) is the solver of choice.
+- **Conic Constraints**: Second Order Cone Programming (SOCP) is used.
+- **Non-linear Constraints**: A non-linear optimizer is typically employed.
+
+## 🌀 Non-linear Trajectory Optimization/Planning
+
+The question arises: Can this be converted into TVLQR? Let's delve deeper:
+
+### 🛠️ Methods
+
+Two primary methods are used for non-linear trajectory optimization:
+
+1. **Direct Collocation (DIRCOL)**: A direct method.
+2. **Differential Dynamic Programming (DDP) or iterative LQR (iLQR)**: An indirect method.
+
+Both methods are designed to tackle similar problems, but they have distinct characteristics:
+
+| Terms                    | DIRCOL                                                                                          | DDP/iLQR                                                                                                   |
+|--------------------------|-------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| Dynamic Feasibility      | Only satisfied when converged.                                                                  | Always maintained with rollout, allowing for early stopping and deployment.                                |
+| Warm Start               | Can use an initial guess.                                                                       | Cannot use a warm start.                                                                                   |
+| Dynamic Constraints      | Can handle any constraints, depending on the backend solver.                                    | Handles constraints with modifications: For `u`: Use squashing or constrained QP. For `x`: Add extra cost or use augmented Lagrangian. |
+| Output                   | Produces only an open-loop trajectory, requiring an additional controller.                       | The converged feedback term provides a built-in controller.                                                |
+| Speed                    | Slower as it solves the entire problem at once.                                                 | Faster due to simplified subproblems.                                                                      |
+| Implementation Difficulty| Harder to implement.                                                                            | Easier to implement.                                                                                       |
+| Numeric Stability        | Robust.                                                                                        | Long horizons can lead to ill-conditioning.                                                                |
+
+
+
+### 🤔 How to Choose Between DIRCOL and DDP/iLQR?
+
+- **Online/Real-time Control**: DDP is preferable since speed is paramount and constraint tolerance can be slightly relaxed.
+- **Offline Trajectory Generation & Long-horizon Problems**: DIRCOL is more suitable.
+- **Multi-shooting Approach**: Use DDP for subtrajectory rollouts (with reduced horizons) and combine them with constraints solved by DIRCOL (simplifying the problem).
+
+In conclusion, the choice of algorithm largely depends on the specific requirements and constraints of the problem at hand. By understanding the strengths and weaknesses of each method, one can make informed decisions in the realm of optimal control.

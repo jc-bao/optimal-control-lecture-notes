@@ -66,7 +66,7 @@ Delve into the practical aspects of control systems with the following topics:
 2. **Hybrid Systems with Contact** (Lecture 16)
    - Understanding systems that exhibit both continuous and discrete dynamics.
 
-3. **Convex Relaxation** (Lecture 21)
+3. **Convex Relaxation and landing rocket** (Lecture 21)
    - Techniques to simplify complex optimization problems.
 
 4. **Legged Robots and QPs for Control** (Lecture 22)
