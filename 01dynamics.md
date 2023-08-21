@@ -42,7 +42,3 @@ Equilibrium points are states where the system remains unchanged over time. The 
 $$
 \textrm{Re} \big[ \text{eig} \left( \frac{\partial f}{\partial x} \right) \big] < 0
 $$
-
----
-
-*End of Notes.*
