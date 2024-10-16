@@ -42,3 +42,88 @@ Equilibrium points are states where the system remains unchanged over time. The 
 $$
 \textrm{Re} \big[ \text{eig} \left( \frac{\partial f}{\partial x} \right) \big] < 0
 $$
+
+## Basic Concepts
+
+**Response of Linear Time-Invariant (LTI) Systems**  
+
+$$
+\dot{x} = A x + B u \\
+x(t) = e^{A(t-t_0)} x(t_0) + \int_{t_0}^{t} e^{A(t-s)} B u(s) ds
+$$
+
+**Gramian**  
+
+$$
+W(t_0, t) = \int_{t_0}^{t} e^{A(t-s)} B B^T e^{A^T (t-s)} ds
+$$
+
+$W(t_0, t) \xi = \lambda \xi$ if $\lambda$ is large, $\xi$ is easier to control.
+
+**Controllability** 
+
+$\dot{x} = A x + B u$
+
+$C = \begin{bmatrix} B & AB & A^2B & \cdots & A^{n-1}B \end{bmatrix}$ (this is actually the impulse response matrix)
+
+when $rank(C) = n$, the system is controllable.
+
+In that case, we can place $A-BK$ to any desired eigenvalues.
+
+**Reachability**  
+
+$R_t = \set{\xi \mid ∃ u, \text{s.t.} x(t) = \xi}$
+
+**Observability**  
+
+$$
+\dot{x} = A x + B u \\
+y = C x
+$$
+
+$$
+O = \begin{bmatrix} C & CA & CA^2 & \cdots & CA^{n-1} \end{bmatrix}
+$$
+
+when $rank(O) = n$, the system is observable.
+
+**Kalman Filter**
+
+$$
+\dot{\hat{x}} = A \hat{x} + B u + K (y - C \hat{x})
+$$
+
+## Lyapunov Stability
+
+Definition:
+
+$$
+V(x) \geq 0, \forall x \neq 0 \\
+V(0) = 0 \\
+\dot{V}(x) \leq 0, \forall x \neq 0
+$$
+
+## Hamilton Jacobi Bellman Equation
+
+**The problem:**
+
+$$
+J(x(t), u(t), t_0, t_f) = \int_{t_0}^{t_f} l(x,u) dt + Q(x(t_f)) \\
+V(x(t_0), t_0, t_f) = \min_u \left\{ \int_{t_0}^{t_f} l(x,u) dt + Q(x(t_f)) \right\}
+$$
+
+**The HJB equation:**
+
+continous case:
+$$
+- \frac{\partial V}{\partial t} = \min_u \left\{ l(x,u) + \frac{\partial V}{\partial x} f(x,u) \right\}
+$$
+
+or:
+
+$$
+\begin{gather} 0 = \min_u \left[
+      \ell(x,u) + \frac{\partial J^*}{\partial x} f(x,u) \right] \\
+      \pi^*(x) = \argmin_u \left[ \ell(x,u) + \frac{\partial J^*}{\partial x} f(x,u) \right]
+      \end{gather}
+$$

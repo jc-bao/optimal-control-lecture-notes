@@ -117,6 +117,8 @@ u &= \arg\min_{\tilde{u}} H(x, \tilde{u}, \lambda) \ \text{such that} \ \tilde{u
 \end{align}
 $$
 
+
+
 ## 🎯 Shooting Method
 
 - 🚀 Start with an initial guess trajectory.
@@ -191,3 +193,4 @@ Both methods are designed to tackle similar problems, but they have distinct cha
 - **Multi-shooting Approach**: Use DDP for subtrajectory rollouts (with reduced horizons) and combine them with constraints solved by DIRCOL (simplifying the problem).
 
 In conclusion, the choice of algorithm largely depends on the specific requirements and constraints of the problem at hand. By understanding the strengths and weaknesses of each method, one can make informed decisions in the realm of optimal control.
+
